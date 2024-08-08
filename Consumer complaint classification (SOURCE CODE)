@@ -1,0 +1,78 @@
+import numpy as np
+import pandas as pd
+from sklearn.model_selection import train_test_split
+from sklearn.linear_model import LogisticRegression
+from sklearn.tree import DecisionTreeClassifier
+from sklearn.svm import SVC
+from sklearn.neighbors import KNeighborsClassifier
+from sklearn.neural_network import MLPClassifier
+from sklearn.metrics import accuracy_score, confusion_matrix
+
+# Load the dataset
+data = pd.read_csv("/payment.csv")
+
+# Handle missing values
+data = data.dropna()  # Option 1: Remove rows with missing values
+# OR
+data['oldbalanceDest'].fillna(data['oldbalanceDest'].mean(), inplace=True)  # Option 2: Impute missing values
+
+# Map 'type' and 'isFraud' to numerical values
+data["type"] = data["type"].map({"CASH_OUT": 1, "PAYMENT": 2, "CASH_IN": 3, "TRANSFER": 4, "DEBIT": 5})
+data["isFraud"] = data["isFraud"].map({0: "No Fraud", 1: "Fraud"})
+
+# Split data into features (x) and target (y)
+x = np.array(data[["type", "amount", "oldbalanceOrg", "newbalanceOrig"]])
+y = np.array(data[["isFraud"]])
+
+# Split the dataset into training and testing sets
+xtrain, xtest, ytrain, ytest = train_test_split(x, y, test_size=0.10, random_state=42)
+
+# Logistic Regression model
+logistic_model = LogisticRegression()
+logistic_model.fit(xtrain, ytrain)
+predict = logistic_model.predict(xtest)
+accuracy_1 = accuracy_score(ytest, predict)
+confusion_matrix_1 = confusion_matrix(ytest, predict)
+print("Logistic Regression Accuracy:", accuracy_1)
+print("Logistic Regression Confusion Matrix:")
+print(confusion_matrix_1)
+
+# Decision Tree model
+decision_tree_model = DecisionTreeClassifier()
+decision_tree_model.fit(xtrain, ytrain)
+predictions = decision_tree_model.predict(xtest)
+accuracy = accuracy_score(ytest, predictions)
+print("Decision Tree Accuracy:", accuracy)
+confusion = confusion_matrix(ytest, predictions)
+print("Decision Tree Confusion Matrix:")
+print(confusion)
+
+# SVM model
+svm_model = SVC()
+svm_model.fit(xtrain, ytrain.ravel())
+svm_predict = svm_model.predict(xtest)
+svm_accuracy = accuracy_score(ytest, svm_predict)
+confusion_matrix_3 = confusion_matrix(ytest, svm_predict)
+print("SVM Accuracy:", svm_accuracy)
+print("SVM Confusion Matrix:")
+print(confusion_matrix_3)
+
+#knn model
+knn_model = KNeighborsClassifier()
+knn_model.fit(xtrain, ytrain.ravel())
+knn_predict = knn_model.predict(xtest)
+knn_accuracy = accuracy_score(ytest, knn_predict)
+knn_confusion_matrix = confusion_matrix(ytest, knn_predict)
+print("K-Nearest Neighbors (KNN) Accuracy:", knn_accuracy)
+print("K-Nearest Neighbors (KNN) Confusion Matrix:")
+print(knn_confusion_matrix)
+
+# Artificial Neural Networks (ANN) model
+ann_model = MLPClassifier()
+ann_model.fit(xtrain, ytrain.ravel())
+ann_predict = ann_model.predict(xtest)
+ann_accuracy = accuracy_score(ytest, ann_predict)
+ann_confusion_matrix = confusion_matrix(ytest, ann_predict)
+print("Artificial Neural Networks (ANN) Accuracy:", ann_accuracy)
+print("Artificial Neural Networks (ANN) Confusion Matrix:")
+print(ann_confusion_matrix)
